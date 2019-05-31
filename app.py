@@ -99,20 +99,6 @@ def download_file():
 def doimport():
     if request.method == 'POST':
         print(request.files)
-
-        def category_init_func(row):
-            c = Category(row['name'])
-            c.id = row['id']
-            return c
-
-        def post_init_func(row):
-            c = Category.query.filter_by(name=row['category']).first()
-            p = Post(row['title'], row['body'], c, row['pub_date'])
-            return p
-        request.save_book_to_database(
-            field_name='file', session=db.session,
-            tables=[Category, Post],
-            initializers=[category_init_func, post_init_func])
         return redirect(url_for('.handson_table'), code=302)
     return '''
     <!doctype html>
@@ -126,7 +112,7 @@ def doimport():
 
 @app.route("/export", methods=['GET'])
 def doexport():
-    return excel.make_response_from_tables(db.session, [Category, Post], "xls")
+    return excel.make_response_from_tables(db.session, [MasterFileUpload], "xls")
 
 
 @app.route("/custom_export", methods=['GET'])
@@ -139,7 +125,7 @@ def docustomexport():
 @app.route("/handson_view", methods=['GET'])
 def handson_table():
     return excel.make_response_from_tables(
-        db.session, [Category, Post], 'handsontable.html')
+        db.session, [MasterFileUpload], 'handsontable.html')
 
 
 if __name__ == "__main__":

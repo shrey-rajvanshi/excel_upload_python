@@ -5,9 +5,9 @@
 </head>
 <body>
 	<h1>Excel file upload (csv, tsv, csvz, tsvz only)</h1>
-    <form action="" name="file_upload" method=post name='upload_file' enctype=multipart/form-data><p>
-    	<select class='form-control' id='upload_file' name='upload_file'>
-    		<option id='select_file' value='0'>Select File</option>
+    <form action="" method=post enctype=multipart/form-data name="form_upload_file">
+		<select class='form-control' id='file_type' name='upload_file'>
+			<option id='select_file' value='0'>Select File type</option>
     		{% for file_type in file_types %}
     			<option value='{{file_type.title}}'> {{file_type.title}}</option>
     		{% endfor %}
