@@ -41,27 +41,35 @@ def get_file_object(file, extension):
     print(file, extension)
     try:
         if extension == 'csv':
-            return panda.read_csv(file)
+            return pandas.read_csv(file)
         elif extension == 'xlxs':
-            return panda.read_excel(file)
+            return pandas.read_excel(file)
     except:
         return False
 
 
 def get_file_headers(file_object):
-    return file_object.columns.values
+    return list(file_object.columns.values)
 
 # TODO: Get column from DB using upload file name
 def get_number_of_columns(master_file):
-    pass
+    try:
+        return db.session.query(MasterFileUpload).filter_by(title=master_file).one().number_of_columns
+    except Exception as e:
+        print e
+        return -1
 
 
-def save(file_object):
+def save_to_db(file_object, file_headers):
     # TODO: For each sheet if excel
-    file_object_dict = file_object.to_dict()
-    for row in file_object_dict:
-        # TODO: If type date then take first value
-        pass
+    try:
+        a = file_object.to_sql('import_data', db.engine)
+        print a
+        return True
+    except Exception as e:
+        print e
+        return False
+
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload_file():
@@ -75,10 +83,12 @@ def upload_file():
             # TODO: Append to error json
             return 'file extension error'
         file_object = get_file_object(uploaded_file, file_extension)
-        if not file_object:
-            # TODO: Append to error json
-            return 'file object error'
+        print file_object
+        # if not file_object.bool():
+        #     # TODO: Append to error json
+        #     return 'file object error'
         file_headers = get_file_headers(file_object)
+        print file_headers
         if not file_headers:
             # TODO: Append to error json
             return 'file header error'
@@ -86,7 +96,10 @@ def upload_file():
         if master_file_number_of_columns != len(file_headers):
             # TODO: Return error json
             return
-        return jsonify({"result": request.get_array('file')})
+        if save_to_db(file_object, file_headers):
+            return jsonify({"result": "True"})
+        else:
+            return jsonify({"result": "False"})
     file_types = MasterFileUpload.query.all()
     return render_template('home.html', file_types = file_types)
 
