@@ -28,21 +28,21 @@ class MasterFileUpload(db.Model):
 
 db.create_all()
 
-def get_file_extension(file):
-    file_name = file.filename
+def get_file_extension(filename):
     try:
-        file_extension = file_name.split('.')[-1]
-        if file_extension in ['.csv', '.xlxs']:
+        file_extension = filename.split('.')[-1]
+        if file_extension in ['csv', 'xlxs']:
             return file_extension
     except:
         return False
 
 
-def get_file_object(file):
+def get_file_object(file, extension):
+    print(file, extension)
     try:
-        if file_extension == '.csv':
+        if extension == 'csv':
             return panda.read_csv(file)
-        elif file_extension == '.xlxs':
+        elif extension == 'xlxs':
             return panda.read_excel(file)
     except:
         return False
@@ -69,18 +69,19 @@ def upload_file():
         master_file = request.form['upload_file']
         uploaded_file = request.files['file']
         upload_file_name = uploaded_file.filename
+        print(upload_file_name)
         file_extension = get_file_extension(upload_file_name)
         if not file_extension:
-            # TODO: Return error json
-            return
-        file_object = get_file_object(file)
+            # TODO: Append to error json
+            return 'file extension error'
+        file_object = get_file_object(uploaded_file, file_extension)
         if not file_object:
-            # TODO: Return error json
-            return
+            # TODO: Append to error json
+            return 'file object error'
         file_headers = get_file_headers(file_object)
         if not file_headers:
-            # TODO: Return error json
-            return
+            # TODO: Append to error json
+            return 'file header error'
         master_file_number_of_columns = get_number_of_columns(master_file)
         if master_file_number_of_columns != len(file_headers):
             # TODO: Return error json
