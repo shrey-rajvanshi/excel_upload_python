@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for, render_template
+from flask import Flask, flash, request, jsonify, redirect, url_for, render_template
 import flask_excel as excel
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -9,6 +9,7 @@ import pandas
 app = Flask(__name__)
 excel.init_excel(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp.db'
+app.secret_key = b'_5#y2uadfkl97dasf9L"F4Q8z\n\xec]/'
 db = SQLAlchemy(app)
 
 
@@ -73,34 +74,36 @@ def save_to_db(file_object, file_headers):
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload_file():
+    errors=[]
+    file_types = MasterFileUpload.query.all()
+
     if request.method == 'POST':
         master_file = request.form['upload_file']
         uploaded_file = request.files['file']
         upload_file_name = uploaded_file.filename
-        print(upload_file_name)
+        # print(upload_file_name)
+
         file_extension = get_file_extension(upload_file_name)
         if not file_extension:
-            # TODO: Append to error json
-            return 'file extension error'
+            flash('File extension should be csv or xlsx', 'error')
+            return render_template('home.html',file_types = file_types)
         file_object = get_file_object(uploaded_file, file_extension)
-        print file_object
-        # if not file_object.bool():
-        #     # TODO: Append to error json
-        #     return 'file object error'
+
         file_headers = get_file_headers(file_object)
-        print file_headers
         if not file_headers:
-            # TODO: Append to error json
-            return 'file header error'
-        master_file_number_of_columns = get_number_of_columns(master_file)
-        if master_file_number_of_columns != len(file_headers):
-            # TODO: Return error json
-            return
+            flash('File Headers error', 'error')
+            return render_template('home.html', file_types = file_types)
+
+        expected_column_len = get_number_of_columns(master_file)
+        if expected_column_len != len(file_headers):
+            flash("Please upload file with %s columns " % expected_column_len)
+            return render_template('home.html', file_types=file_types)
+
         if save_to_db(file_object, file_headers):
-            return jsonify({"result": "True"})
+            flash("File uploaded successfully", 'success')
         else:
-            return jsonify({"result": "False"})
-    file_types = MasterFileUpload.query.all()
+            flash("File could not be uploaded successfully")
+
     return render_template('home.html', file_types = file_types)
 
 

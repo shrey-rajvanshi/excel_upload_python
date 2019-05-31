@@ -2,6 +2,19 @@
 <html>
 <head>
 	<title>Upload an excel file</title>
+	<style>
+		.error { color: red;}
+		.success { color:green;}
+	</style>
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
+			<ul class=flashes>
+			{% for category, message in messages %}
+				<div class="{{ category }}">{{ message }}</div>
+			{% endfor %}
+			</ul>
+		{% endif %}
+	{% endwith %}
 </head>
 <body>
 	<h1>Excel file upload (csv, tsv, csvz, tsvz only)</h1>
@@ -15,6 +28,5 @@
         <input type="file" name="file">
     	<input type=submit value=Upload>
     </form>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </body>
 </html>
