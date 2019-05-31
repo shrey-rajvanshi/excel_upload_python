@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for
+from flask import Flask, request, jsonify, redirect, url_for, render_template
 import flask_excel as excel
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -32,14 +32,8 @@ db.create_all()
 def upload_file():
     if request.method == 'POST':
         return jsonify({"result": request.get_array('file')})
-    return '''
-    <!doctype html>
-    <title>Upload an excel file</title>
-    <h1>Excel file upload (csv, tsv, csvz, tsvz only)</h1>
-    <form action="" method=post enctype=multipart/form-data><p>
-    <input type=file name=file><input type=submit value=Upload>
-    </form>
-    '''
+    file_types = MasterFileUpload.query.all()
+    return render_template('home.html', file_types = file_types)
 
 
 @app.route("/download", methods=['GET'])
