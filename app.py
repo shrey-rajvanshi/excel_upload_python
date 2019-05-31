@@ -40,7 +40,6 @@ def get_file_extension(filename):
 
 
 def get_file_object(file, extension):
-    print(file, extension)
     try:
         if extension == 'csv':
             return pandas.read_csv(file)
@@ -65,15 +64,17 @@ def get_number_of_columns(master_file):
 def save_to_db(file_object, file_headers):
     # TODO: For each sheet if excel
     try:
-        file_objects = list(file_object.fillna('').to_records())
-        print file_objects[0]
-        print set(file_objects)
-        db.engine.execute(
-            text('INSERT INTO import_data ({}) VALUES (:values)'.format(', '.join(["'c{}'".format(i) for i in range(len(file_headers))]))),
-            values=set(file_objects)
-        )
+        file_objects = list(file_object.fillna('').to_records(index=False))
+        sql_str="INSERT INTO import_data (%s) VALUES " % format(', '.join(["'c{}'".format(i+1) for i in range(len(file_headers))]))
+
+        for row in file_objects:
+            sql_str += str(row)
+            sql_str += ", "
+
+        db.engine.execute(sql_str[:-2])
         return True
     except Exception as e:
+        print("Error")
         print e
         return False
 
@@ -87,7 +88,6 @@ def upload_file():
         master_file = request.form['upload_file']
         uploaded_file = request.files['file']
         upload_file_name = uploaded_file.filename
-        # print(upload_file_name)
 
         file_extension = get_file_extension(upload_file_name)
         if not file_extension:
@@ -112,43 +112,6 @@ def upload_file():
 
     return render_template('home.html', file_types = file_types)
 
-
-@app.route("/download", methods=['GET'])
-def download_file():
-    return excel.make_response_from_array([[1, 2], [3, 4]], "csv")
-
-
-@app.route("/import", methods=['GET', 'POST'])
-def doimport():
-    if request.method == 'POST':
-        print(request.files)
-        return redirect(url_for('.handson_table'), code=302)
-    return '''
-    <!doctype html>
-    <title>Upload an excel file</title>
-    <h1>Excel file upload (xls, xlsx, ods please)</h1>
-    <form action="" method=post enctype=multipart/form-data><p>
-    <input type=file name=file><input type=submit value=Upload>
-    </form>
-    '''
-
-
-@app.route("/export", methods=['GET'])
-def doexport():
-    return excel.make_response_from_tables(db.session, [MasterFileUpload], "xls")
-
-
-@app.route("/custom_export", methods=['GET'])
-def docustomexport():
-    query_sets = Category.query.filter_by(id=1).all()
-    column_names = ['id', 'name']
-    return excel.make_response_from_query_sets(query_sets, column_names, "xls")
-
-
-@app.route("/handson_view", methods=['GET'])
-def handson_table():
-    return excel.make_response_from_tables(
-        db.session, [MasterFileUpload], 'handsontable.html')
 
 
 if __name__ == "__main__":
