@@ -1,6 +1,7 @@
 from flask import Flask, flash, request, jsonify, redirect, url_for, render_template
 import flask_excel as excel
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text
 from datetime import datetime
 import pandas
 # please uncomment the following line if you use pyexcel < 0.2.2
@@ -64,8 +65,13 @@ def get_number_of_columns(master_file):
 def save_to_db(file_object, file_headers):
     # TODO: For each sheet if excel
     try:
-        a = file_object.to_sql('import_data', db.engine)
-        print a
+        file_objects = list(file_object.fillna('').to_records())
+        print file_objects[0]
+        print set(file_objects)
+        db.engine.execute(
+            text('INSERT INTO import_data ({}) VALUES (:values)'.format(', '.join(["'c{}'".format(i) for i in range(len(file_headers))]))),
+            values=set(file_objects)
+        )
         return True
     except Exception as e:
         print e
