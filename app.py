@@ -78,6 +78,14 @@ def save_to_db(file_object, file_headers):
         print e
         return False
 
+def run_proc(master_file_upload):
+    try:
+        proc_name = db.session.query(MasterFileUpload).filter_by(title=master_file).one().procedure_name
+        db.engine.execute("CALL %s ;" % proc_name)
+    except Exception as e:
+        print e
+        return False
+
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload_file():
@@ -109,7 +117,11 @@ def upload_file():
             flash("File uploaded successfully", 'success')
         else:
             flash("File could not be uploaded successfully")
-
+        procedure_run = run_proc(master_file)
+        if not procedure_run:
+            flash("Query failed for procedure - %s with error:" % \
+                db.session.query(MasterFileUpload).filter_by(title=master_file).one().procedure_name)
+            return render_template('home.html', file_types=file_types)
     return render_template('home.html', file_types = file_types)
 
 
