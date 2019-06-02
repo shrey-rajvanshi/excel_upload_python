@@ -5,7 +5,13 @@
 	<style>
 		.error { color: red;}
 		.success { color:green;}
+		.row-spacing {min-height: 20px;}
 	</style>
+	<meta charset="utf-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	{% with messages = get_flashed_messages(with_categories=true) %}
 		{% if messages %}
 			<ul class=flashes>
@@ -17,16 +23,31 @@
 	{% endwith %}
 </head>
 <body>
-	<h1>Excel file upload (csv, tsv, csvz, tsvz only)</h1>
-    <form action="" method=post enctype=multipart/form-data name="form_upload_file">
-		<select class='form-control' id='file_type' name='upload_file'>
-			<option id='select_file' value='0'>Select File type</option>
-    		{% for file_type in file_types %}
-    			<option value='{{file_type.title}}'> {{file_type.title}}</option>
-    		{% endfor %}
-    	</select>
-        <input type="file" name="file">
-    	<input type=submit value=Upload>
-    </form>
+	<div class="container-fluid">
+  		<div class="jumbotron">
+    		<h1 align='center'><strong>Excel File Upload Program</strong></h1> 
+  		</div>
+	</div>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-3"></div>  	
+			<div class="col-sm-6">
+				<form action="" method=post enctype=multipart/form-data name="form_upload_file">
+					<select class='form-control' id='file_type' name='upload_file'>
+						<option id='select_file' value='0'>Select File type</option>
+    					{% for file_type in file_types %}
+    						<option value='{{file_type.title}}'> {{file_type.title}}</option>
+    					{% endfor %}
+    				</select>
+    				<div class="row-spacing"></div>
+        			<input type="file" class="form-control" name="file">
+        			<div class="row-spacing"></div>
+    				<input type=submit  class='btn btn-primary' value=Upload>
+    			</form>
+    		</div>
+			<div class="col-sm-3"></div>
+		</div>	  
+	</div>
+    
 </body>
 </html>
