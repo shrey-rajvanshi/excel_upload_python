@@ -87,7 +87,7 @@ def run_proc(master_file_upload):
         return False
 
 
-@app.route("/upload", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def upload_file():
     errors=[]
     file_types = MasterFileUpload.query.all()
