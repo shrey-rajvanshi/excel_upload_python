@@ -9,12 +9,13 @@ import pandas
 
 app = Flask(__name__)
 excel.init_excel(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@:localhost/hughes_pom'
 app.secret_key = b'_5#y2uadfkl97dasf9L"F4Q8z\n\xec]/'
 db = SQLAlchemy(app)
 
 
 class MasterFileUpload(db.Model):
+    __tablename__ = 'master_fileupload'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80))
     number_of_columns = db.Column(db.Integer)
