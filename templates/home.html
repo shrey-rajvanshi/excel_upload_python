@@ -36,7 +36,7 @@
 					<select class='form-control' id='file_type' name='upload_file'>
 						<option id='select_file' value='0'>Select File type</option>
     					{% for file_type in file_types %}
-    						<option value='{{file_type.upload_file}}'> {{file_type.upload_file}}</option>
+    						<option value='{{file_type.title}}'> {{file_type.title}}</option>
     					{% endfor %}
     				</select>
     				<div class="row-spacing"></div>
