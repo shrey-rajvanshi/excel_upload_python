@@ -29,12 +29,12 @@ class MasterFileUpload(db.Model):
     def __repr__(self):
         return '<MFU %r>' % self.title
 
-db.create_all()
+#db.create_all()
 
 def get_file_extension(filename):
     try:
         file_extension = filename.split('.')[-1]
-        if file_extension in ['csv', 'xlxs']:
+        if file_extension in ['csv', 'xlsx']:
             return file_extension
     except:
         return False
@@ -44,7 +44,7 @@ def get_file_object(file, extension):
     try:
         if extension == 'csv':
             return pandas.read_csv(file)
-        elif extension == 'xlxs':
+        elif extension == 'xlsx':
             return pandas.read_excel(file)
     except:
         return False
@@ -66,23 +66,32 @@ def save_to_db(file_object, file_headers):
     # TODO: For each sheet if excel
     try:
         file_objects = list(file_object.fillna('').to_records(index=False))
-        sql_str="INSERT INTO import_data (%s) VALUES " % format(', '.join(["'c{}'".format(i+1) for i in range(len(file_headers))]))
+        sql_str="INSERT INTO import_data (%s) VALUES " % format(', '.join(["c{}".format(i+1) for i in range(len(file_headers))]))
+
+        # for row in file_objects:
+        #     sql_str += str(row)
+        #     print(sql_str)
+        #     sql_str += ", "
 
         for row in file_objects:
-            sql_str += str(row)
+            print row
+            encoded_str=[]
+            for i in row:
+                encoded_str.append(str(i))
+            sql_str += str(tuple(encoded_str))
             sql_str += ", "
 
-        db.engine.execute(sql_str[:-2])
+        print(sql_str[:-2])
+        # db.engine.execute(sql_str[:-2])
         return True
     except Exception as e:
-        print("Error")
         print e
         return False
 
-def run_proc(master_file_upload):
+def run_proc(master_file):
     try:
         proc_name = db.session.query(MasterFileUpload).filter_by(title=master_file).one().procedure_name
-        db.engine.execute("CALL %s ;" % proc_name)
+        #db.engine.execute("CALL %s ;" % proc_name)
     except Exception as e:
         print e
         return False
@@ -99,6 +108,7 @@ def upload_file():
         upload_file_name = uploaded_file.filename
 
         file_extension = get_file_extension(upload_file_name)
+        print(file_extension)
         if not file_extension:
             flash('File extension should be csv or xlsx', 'error')
             return render_template('home.html',file_types = file_types)
@@ -110,6 +120,10 @@ def upload_file():
             return render_template('home.html', file_types = file_types)
 
         expected_column_len = get_number_of_columns(master_file)
+        if expected_column_len == -1:
+            flash("Please select correct file type.")
+            return render_template('home.html', file_types=file_types)
+
         if expected_column_len != len(file_headers):
             flash("Please upload file with %s columns " % expected_column_len)
             return render_template('home.html', file_types=file_types)
