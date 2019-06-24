@@ -16,10 +16,10 @@ db = SQLAlchemy(app)
 
 class MasterFileUpload(db.Model):
     __tablename__ = 'master_fileupload'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80))
-    number_of_columns = db.Column(db.Integer)
-    procedure_name = db.Column(db.String(80))
+    id = db.Column('fileup_id', db.Integer, primary_key=True)
+    title = db.Column('upload_file', db.String(80))
+    number_of_columns = db.Column('col_no', db.Integer)
+    procedure_name = db.Column('dest_table', db.String(80))
 
     def __init__(self, title, number_of_columns=0, procedure_name=''):
         self.title=title
