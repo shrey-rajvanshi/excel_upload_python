@@ -92,6 +92,10 @@ def run_proc(master_file):
     try:
         proc_name = db.session.query(MasterFileUpload).filter_by(title=master_file).one().procedure_name
         #db.engine.execute("CALL %s ;" % proc_name)
+        with db.engine.begin() as conn:
+            conn.execute("CALL %s();" % proc_name)
+        return True
+
     except Exception as e:
         print e
         return False
