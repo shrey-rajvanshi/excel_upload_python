@@ -64,9 +64,9 @@ def get_number_of_columns(master_file):
 
 def save_to_db(file_object, file_headers):
     # TODO: For each sheet if excel
+    db.engine.execute("delete from import_data")
     try:
         file_objects = list(file_object.fillna('').to_records(index=False))
-        sql_str="INSERT INTO import_data (%s) VALUES " % format(', '.join(["c{}".format(i+1) for i in range(len(file_headers))]))
 
         # for row in file_objects:
         #     sql_str += str(row)
@@ -74,15 +74,17 @@ def save_to_db(file_object, file_headers):
         #     sql_str += ", "
 
         for row in file_objects:
-            print row
+            sql_str="INSERT INTO import_data (%s) VALUES " % format(', '.join(["c{}".format(i+1) for i in range(len(file_headers))]))
             encoded_str=[]
             for i in row:
-                encoded_str.append(str(i))
+                if type(i) is unicode:
+                    i = i.encode("utf-8").strip()
+                else:
+                    i=str(i)
+                encoded_str.append(i)
             sql_str += str(tuple(encoded_str))
-            sql_str += ", "
+            db.engine.execute(sql_str)
 
-        print(sql_str[:-2])
-        # db.engine.execute(sql_str[:-2])
         return True
     except Exception as e:
         print e
