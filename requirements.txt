@@ -16,7 +16,7 @@ pyexcel-xls==0.5.8
 pyexcel-xlsx==0.5.7
 SQLAlchemy==1.3.4
 texttable==1.6.1
-Werkzeug==0.15.4
+Werkzeug==0.15.5
 xlrd==1.2.0
 xlwt==1.3.0
 pandas==0.24.2
